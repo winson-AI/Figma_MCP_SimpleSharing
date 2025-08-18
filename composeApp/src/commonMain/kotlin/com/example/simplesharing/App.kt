@@ -14,13 +14,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -40,6 +44,11 @@ import simplesharing.composeapp.generated.resources.ic_not_interested
 import simplesharing.composeapp.generated.resources.ic_duet
 import simplesharing.composeapp.generated.resources.ic_react
 import simplesharing.composeapp.generated.resources.ic_favorites
+import simplesharing.composeapp.generated.resources.ic_status_battery
+import simplesharing.composeapp.generated.resources.ic_status_signal
+import simplesharing.composeapp.generated.resources.ic_status_wifi
+
+// (Status bar icons are now coming from Figma-exported resources)
 
 data class SocialApp(
     val name: String,
@@ -51,6 +60,91 @@ data class ActionItem(
     val name: String,
     val icon: org.jetbrains.compose.resources.DrawableResource
 )
+
+@Composable
+private fun StatusBar(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(44.dp)
+    ) {
+        // Time display - positioned exactly as in Figma (x=23.18, y=13)
+        Text(
+            text = "9:41",
+            color = Color.White,
+            fontSize = 15.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = (-0.3).sp,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 23.dp, top = 13.dp)
+        )
+        
+        // Status icons - positioned exactly as in Figma
+        Row(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(end = 15.dp, top = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Mobile Signal Icon - x=324.21, y=16.67
+            Image(
+                painter = painterResource(Res.drawable.ic_status_signal),
+                contentDescription = "Mobile Signal",
+                modifier = Modifier.size(18.dp, 10.dp)
+            )
+
+            // WiFi Icon - x=348.53, y=16.33
+            Image(
+                painter = painterResource(Res.drawable.ic_status_wifi),
+                contentDescription = "WiFi",
+                modifier = Modifier.size(16.dp, 10.dp)
+            )
+
+            // Battery Icon - x=375, y=17
+            Image(
+                painter = painterResource(Res.drawable.ic_status_battery),
+                contentDescription = "Battery",
+                modifier = Modifier.size(22.dp, 10.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun Header(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(44.dp)
+    ) {
+        // Following tab - positioned exactly as in Figma (x=132, y=57)
+        Text(
+            text = "Following",
+            color = Color.White.copy(alpha = 0.6f),
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 132.dp, top = 13.dp)
+        )
+        
+        // For You tab (active) - positioned exactly as in Figma (x=223, y=55)
+        Text(
+            text = "For You",
+            color = Color.White,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 0.1.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .align(Alignment.TopStart)
+                .padding(start = 223.dp, top = 11.dp)
+        )
+    }
+}
 
 @Composable
 @Preview
@@ -68,88 +162,32 @@ fun App() {
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
-            
-            // Dark overlay for better text readability
-            Box(
+
+            // Status Bar - separate layer at top (y=0, height=44)
+            StatusBar(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.3f))
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
             )
             
-            // Status bar
-            Row(
+            // Header - separate layer below status bar (y=44, height=44)
+            Header(
                 modifier = Modifier
+                    .align(Alignment.TopCenter)
                     .fillMaxWidth()
-                    .padding(horizontal = 23.dp, vertical = 13.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "9:41",
-                    color = Color.White,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = (-0.3).sp
-                )
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Signal strength
-                    Text(
-                        text = "●●●●",
-                        color = Color.White,
-                        fontSize = 8.sp
-                    )
-                    // WiFi symbol
-                    Text(
-                        text = "📶",
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
-                    // Battery
-                    Text(
-                        text = "🔋",
-                        color = Color.White,
-                        fontSize = 12.sp
-                    )
-                }
-            }
-            
-            // Header
-            Row(
+                    .offset(y = 44.dp)
+            )
+
+            // User Avatar and Plus Button - positioned exactly as in Figma (x=360, y=433)
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 57.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                    .align(Alignment.TopStart)
+                    .zIndex(1f)
+                    .padding(start = 360.dp, top = 433.dp)
             ) {
-                Text(
-                    text = "Following",
-                    color = Color.White.copy(alpha = 0.6f),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(end = 32.dp)
-                )
-                Text(
-                    text = "For You",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    letterSpacing = 0.1.sp
-                )
-            }
-            
-            // Right side controls
-            Column(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(end = 13.dp, top = 80.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                // User avatar with plus button
+                // User Avatar with Plus Button
                 Box {
+                    // Main user avatar - x=360, y=433, size=47x47
                     Image(
                         painter = painterResource(Res.drawable.user_avatar),
                         contentDescription = "User Avatar",
@@ -159,20 +197,35 @@ fun App() {
                             .border(2.dp, Color.White, CircleShape),
                         contentScale = ContentScale.Crop
                     )
-                    Image(
-                        painter = painterResource(Res.drawable.ic_plus),
-                        contentDescription = "Add",
+                    
+                    // Red plus button overlay - x=373, y=470.5, size=21x21
+                    Box(
                         modifier = Modifier
                             .size(21.dp)
+                            .background(Color(0xFFEA4359), CircleShape)
                             .align(Alignment.BottomCenter)
-                            .offset(y = 10.dp)
-                    )
+                            .offset(x = 0.dp, y = 1.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(Res.drawable.ic_plus),
+                            contentDescription = "Add",
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
                 }
-                
-                // Heart and likes
+            }
+
+            // Likes Section - positioned exactly as in Figma (x=363.5, y=514)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .zIndex(1f)
+                    .padding(start = 363.5.dp, top = 530.dp)
+            ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     val infiniteTransition = rememberInfiniteTransition()
                     val scale by infiniteTransition.animateFloat(
@@ -183,43 +236,49 @@ fun App() {
                             repeatMode = RepeatMode.Reverse
                         )
                     )
-                    
+
+                    // Heart Icon - x=366, y=514, size=35.5x32.36
                     Box(
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier.size(width = 40.dp, height = 40.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Image(
                             painter = painterResource(Res.drawable.ic_heart),
                             contentDescription = "Like",
                             modifier = Modifier
-                                .size(32.dp)
+                                .size(35.dp)
                                 .graphicsLayer(scaleX = scale, scaleY = scale)
                         )
                     }
+
+                    // Text "328.7K" - x=363.5, y=552, size=41x16
                     Text(
                         text = "328.7K",
                         color = Color.White,
-                        fontSize = 13.sp,
+                        fontSize = 6.sp,
                         fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(41.dp)
                     )
                 }
             }
-            
-            // Bottom sheet
+
+            // Bottom Share Section - positioned with more space for Likes frame
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .padding(bottom = 60.dp)
             ) {
-                // Share to section
+                // Share to Section - exact positioning from Figma
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(226.dp)
                         .background(
                             Color(0xFFF5F5F4),
-                            RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                            RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                         )
                         .padding(top = 10.dp, bottom = 20.dp)
                 ) {
@@ -231,99 +290,359 @@ fun App() {
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    
+
                     Spacer(modifier = Modifier.height(20.dp))
-                    
-                    // Social media icons
-                    val socialApps = listOf(
-                        SocialApp("WhatsApp", Res.drawable.ic_whatsapp, Color(0xFF65D072)),
-                        SocialApp("WhatsApp\nstatus", Res.drawable.ic_whatsapp, Color(0xFF65D072)),
-                        SocialApp("Message", Res.drawable.ic_message, Color(0xFFEA4359)),
-                        SocialApp("SMS", Res.drawable.ic_sms, Color(0xFF5FC87D)),
-                        SocialApp("Messenger", Res.drawable.ic_messenger, Color(0xFF2D67F6)),
-                        SocialApp("Instagram", Res.drawable.ic_instagram, Color(0xFFC837AB))
-                    )
-                    
-                    LazyRow(
-                        modifier = Modifier.padding(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(18.dp)
+
+                    // Social Apps Row - exact positioning from Figma
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        items(socialApps) { app ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // WhatsApp - positioned at x:20, y:629
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(49.dp)
+                                    .background(Color(0xFF65D072), CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
                                 Image(
-                                    painter = painterResource(app.icon),
-                                    contentDescription = app.name,
-                                    modifier = Modifier.size(if (app.name.contains("Message")) 49.dp else 47.dp)
-                                )
-                                Text(
-                                    text = app.name,
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF4E4F57),
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = 13.4.sp
+                                    painter = painterResource(Res.drawable.ic_whatsapp),
+                                    contentDescription = "WhatsApp",
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
+                            Text(
+                                text = "WhatsApp",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // WhatsApp Status - positioned at x:89, y:629
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(49.dp)
+                                    .background(Color(0xFF65D072), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_whatsapp),
+                                    contentDescription = "WhatsApp Status",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "WhatsApp\nstatus",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Message - positioned at x:158, y:628
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(49.dp)
+                                    .background(Color(0xFFEA4359), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_message),
+                                    contentDescription = "Message",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Message",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // SMS - positioned at x:227, y:628
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(49.dp)
+                                    .background(Color(0xFF5FC87D), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_sms),
+                                    contentDescription = "SMS",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "SMS",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Messenger - positioned at x:294, y:629
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(49.dp)
+                                    .background(Color(0xFF2D67F6), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_messenger),
+                                    contentDescription = "Messenger",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Messenger",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Instagram - positioned at x:365, y:628
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(49.dp)
+                                    .background(
+                                        Brush.radialGradient(
+                                            colors = listOf(
+                                                Color(0xFFFFDD55),
+                                                Color(0xFFFF543E),
+                                                Color(0xFFC837AB)
+                                            )
+                                        ),
+                                        CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_instagram),
+                                    contentDescription = "Instagram",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Instagram",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
                         }
                     }
-                    
+
                     Spacer(modifier = Modifier.height(14.dp))
-                    
-                    // Separator
+
+                    // Separator - positioned at x:16, y:713
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         color = Color(0xFFDADBDB),
                         thickness = 1.dp
                     )
-                    
+
                     Spacer(modifier = Modifier.height(14.dp))
-                    
-                    // Action buttons
-                    val actions = listOf(
-                        ActionItem("Report", Res.drawable.ic_report),
-                        ActionItem("Not\ninterested", Res.drawable.ic_not_interested),
-                        ActionItem("Save video", Res.drawable.ic_save_video),
-                        ActionItem("Duet", Res.drawable.ic_duet),
-                        ActionItem("React", Res.drawable.ic_react),
-                        ActionItem("Add to\nFavorites", Res.drawable.ic_favorites)
-                    )
-                    
-                    LazyRow(
-                        modifier = Modifier.padding(horizontal = 21.dp),
-                        horizontalArrangement = Arrangement.spacedBy(22.dp)
+
+                    // Actions Row - exact positioning from Figma
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 21.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        items(actions) { action ->
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                        // Report - positioned at x:21, y:727
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(47.dp)
+                                    .background(Color(0xFFE8E8E7), CircleShape),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(47.dp)
-                                        .background(Color(0xFFE8E8E7), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Image(
-                                        painter = painterResource(action.icon),
-                                        contentDescription = action.name,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                Text(
-                                    text = action.name,
-                                    fontSize = 11.sp,
-                                    color = Color(0xFF4E4F57),
-                                    textAlign = TextAlign.Center,
-                                    lineHeight = 13.4.sp
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_report),
+                                    contentDescription = "Report",
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
+                            Text(
+                                text = "Report",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Not interested - positioned at x:89, y:727
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(47.dp)
+                                    .background(Color(0xFFE8E8E7), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_not_interested),
+                                    contentDescription = "Not interested",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Not\ninterested",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Save video - positioned at x:155.5, y:727
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(47.dp)
+                                    .background(Color(0xFFE8E8E7), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_save_video),
+                                    contentDescription = "Save video",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Save video",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Duet - positioned at x:228, y:727
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(47.dp)
+                                    .background(Color(0xFFE8E8E7), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_duet),
+                                    contentDescription = "Duet",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Duet",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // React - positioned at x:297, y:727
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(47.dp)
+                                    .background(Color(0xFFE8E8E7), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_react),
+                                    contentDescription = "React",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "React",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
+                        }
+
+                        // Add to Favorites - positioned at x:366, y:727
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(47.dp)
+                                    .background(Color(0xFFE8E8E7), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(Res.drawable.ic_favorites),
+                                    contentDescription = "Add to Favorites",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                            Text(
+                                text = "Add to\nFavorites",
+                                fontSize = 11.sp,
+                                color = Color(0xFF4E4F57),
+                                textAlign = TextAlign.Center,
+                                lineHeight = 13.4.sp
+                            )
                         }
                     }
                 }
-                
-                // Bottom bar
+
+                // Cancel Button - positioned at x:0, y:813
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -334,24 +653,26 @@ fun App() {
                     Text(
                         text = "Cancel",
                         fontSize = 15.sp,
+                        fontWeight = FontWeight.Normal,
                         color = Color(0xFF161722)
                     )
                 }
-                
-                // Home indicator
+            }
+
+            // Home Indicator - overlay at the very bottom (y=861, h=35)
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .height(35.dp)
+                    .zIndex(2f),
+                contentAlignment = Alignment.Center
+            ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(35.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .width(134.dp)
-                            .height(5.dp)
-                            .background(Color(0xFF060606), RoundedCornerShape(100.dp))
-                    )
-                }
+                        .width(134.dp)
+                        .height(5.dp)
+                        .background(Color(0xFF060606), RoundedCornerShape(100.dp))
+                )
             }
         }
     }
